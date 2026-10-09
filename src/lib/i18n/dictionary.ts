@@ -16,6 +16,7 @@ export function directionFor(locale: Locale): Direction {
 
 type InviteStrings = {
   navigate: string;
+  navigateWaze: string;
   attendeesLabel: string;
   submit: string;
   submitted: string;
@@ -23,28 +24,34 @@ type InviteStrings = {
   notFound: string;
   /** Builds the personalized greeting prefix shown before the admin greeting. */
   greetingHello: (firstName: string, lastName: string) => string;
+  /** Locale tag for formatting dates. */
+  dateLocale: string;
 };
 
 export const dictionary: Record<Locale, InviteStrings> = {
   en: {
     navigate: "Navigate to location",
+    navigateWaze: "Navigate with Waze",
     attendeesLabel: "How many will arrive?",
-    submit: "Submit",
+    submit: "Confirm attendance",
     submitted: "Thanks! Your response was saved.",
     unavailable: "This invitation is not currently available.",
     notFound: "This invitation link is not valid.",
     greetingHello: (firstName, lastName) =>
-      `Hello ${firstName} ${lastName},`,
+      `Hello ${firstName} ${lastName}`,
+    dateLocale: "en-GB",
   },
   he: {
     navigate: "ניווט למקום האירוע",
+    navigateWaze: "ניווט ב-Waze",
     attendeesLabel: "כמה אורחים יגיעו?",
-    submit: "שליחה",
+    submit: "אישור הגעה",
     submitted: "תודה! התשובה נשמרה.",
     unavailable: "ההזמנה אינה זמינה כעת.",
     notFound: "קישור ההזמנה אינו תקין.",
     greetingHello: (firstName, lastName) =>
-      `שלום ${firstName} ${lastName},`,
+      `שלום ${firstName} ${lastName}`,
+    dateLocale: "he-IL",
   },
 };
 

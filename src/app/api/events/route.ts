@@ -25,7 +25,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { language, imageUrl, address, greeting } = parsed.data;
+  const { language, imageUrl, address, greeting, eventDate, eventTime } =
+    parsed.data;
   const { data, error } = await supabase
     .from("event")
     .insert({
@@ -34,6 +35,8 @@ export async function POST(request: Request) {
       image_url: imageUrl,
       address,
       greeting,
+      event_date: eventDate,
+      event_time: eventTime,
     })
     .select("id")
     .single();

@@ -12,11 +12,17 @@ export const ATTENDEE_MAX = 10;
 export const eventLanguageSchema = z.enum(["he", "en"]);
 
 // Event create: all display + localization fields required (Req 2.1, 2.2, 2.4)
+// Date as yyyy-mm-dd (HTML date input value), time as HH:MM (24h).
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date");
+const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, "Invalid time");
+
 export const eventCreateSchema = z.object({
   language: eventLanguageSchema,
   imageUrl: z.string().min(1, "Image is required"),
   address: z.string().min(1, "Address is required"),
   greeting: z.string().min(1, "Greeting is required"),
+  eventDate: dateSchema,
+  eventTime: timeSchema,
 });
 export type EventCreateInput = z.infer<typeof eventCreateSchema>;
 
@@ -27,6 +33,8 @@ export const eventUpdateSchema = z
     imageUrl: z.string().min(1).optional(),
     address: z.string().min(1).optional(),
     greeting: z.string().min(1).optional(),
+    eventDate: dateSchema.optional(),
+    eventTime: timeSchema.optional(),
     isActive: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {

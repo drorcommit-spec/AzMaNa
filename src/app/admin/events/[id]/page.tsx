@@ -12,9 +12,14 @@ export default async function EditEventPage({
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("event")
-    .select("id, language, image_url, address, greeting")
+    .select("id, language, image_url, address, greeting, event_date, event_time")
     .eq("id", params.id)
-    .maybeSingle<Pick<EventRow, "id" | "language" | "image_url" | "address" | "greeting">>();
+    .maybeSingle<
+      Pick<
+        EventRow,
+        "id" | "language" | "image_url" | "address" | "greeting" | "event_date" | "event_time"
+      >
+    >();
 
   if (!data) {
     notFound();
@@ -34,6 +39,8 @@ export default async function EditEventPage({
           imageUrl: data.image_url,
           address: data.address,
           greeting: data.greeting,
+          eventDate: data.event_date ?? "",
+          eventTime: data.event_time ?? "",
         }}
       />
     </div>

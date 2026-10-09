@@ -17,7 +17,17 @@ export default function LoginPage() {
 
   return (
     <main style={{ maxWidth: 360, margin: "4rem auto", fontFamily: "sans-serif" }}>
-      <h1>AzMaNa Admin</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.jpeg"
+          alt="AzMaNa"
+          width={40}
+          height={40}
+          style={{ borderRadius: 8, objectFit: "cover" }}
+        />
+        <h1 style={{ margin: 0 }}>AzMaNa Admin</h1>
+      </div>
       <form action={formAction}>
         <label>
           Email

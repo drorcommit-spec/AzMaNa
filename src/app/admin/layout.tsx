@@ -14,7 +14,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           borderBottom: "1px solid #ddd",
         }}
       >
-        <Link href="/admin" style={{ fontWeight: 600 }}>
+        <Link
+          href="/admin"
+          style={{
+            fontWeight: 600,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.jpeg"
+            alt="AzMaNa"
+            width={32}
+            height={32}
+            style={{ borderRadius: 6, objectFit: "cover" }}
+          />
           AzMaNa Admin
         </Link>
         <form action={signOutAction}>

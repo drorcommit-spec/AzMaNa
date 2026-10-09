@@ -40,22 +40,108 @@ export function RsvpForm({
     }
   }
 
+  const circleButton = (bg: string): React.CSSProperties => ({
+    width: 56,
+    height: 56,
+    borderRadius: "50%",
+    border: "none",
+    background: bg,
+    color: "#fff",
+    fontSize: 28,
+    lineHeight: 1,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 3px 8px rgba(0,0,0,0.15)",
+  });
+
   return (
-    <div style={{ marginTop: 24 }}>
-      <p>{labels.attendeesLabel}</p>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button type="button" onClick={dec} disabled={count <= ATTENDEE_MIN} aria-label="decrease">
+    <div style={{ textAlign: "center" }}>
+      <p style={{ fontSize: 18, fontWeight: 600, margin: "0 0 16px" }}>
+        {labels.attendeesLabel}
+      </p>
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 18,
+          marginBottom: 20,
+        }}
+      >
+        <button
+          type="button"
+          onClick={dec}
+          disabled={count <= ATTENDEE_MIN}
+          aria-label="decrease"
+          style={{
+            ...circleButton("#e2554f"),
+            opacity: count <= ATTENDEE_MIN ? 0.4 : 1,
+          }}
+        >
           −
         </button>
-        <span style={{ fontSize: 24, minWidth: 32, textAlign: "center" }}>{count}</span>
-        <button type="button" onClick={inc} disabled={count >= ATTENDEE_MAX} aria-label="increase">
+
+        <span
+          style={{
+            minWidth: 72,
+            height: 56,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 28,
+            fontWeight: 700,
+            border: "2px solid #e5c87a",
+            borderRadius: 14,
+          }}
+        >
+          {count}
+        </span>
+
+        <button
+          type="button"
+          onClick={inc}
+          disabled={count >= ATTENDEE_MAX}
+          aria-label="increase"
+          style={{
+            ...circleButton("#2b6fd6"),
+            opacity: count >= ATTENDEE_MAX ? 0.4 : 1,
+          }}
+        >
           +
         </button>
       </div>
-      {error ? <p role="alert" style={{ color: "crimson" }}>{error}</p> : null}
-      {saved ? <p style={{ color: "green" }}>{labels.submitted}</p> : null}
-      <button type="button" onClick={submit} disabled={busy} style={{ marginTop: 12 }}>
-        {labels.submit}
+
+      {error ? (
+        <p role="alert" style={{ color: "crimson" }}>
+          {error}
+        </p>
+      ) : null}
+      {saved ? (
+        <p style={{ color: "#2e8b57", fontWeight: 600 }}>{labels.submitted}</p>
+      ) : null}
+
+      <button
+        type="button"
+        onClick={submit}
+        disabled={busy}
+        style={{
+          width: "100%",
+          padding: "14px 16px",
+          border: "none",
+          borderRadius: 12,
+          background: "linear-gradient(90deg, #d4a62a, #e9c558)",
+          color: "#fff",
+          fontSize: 18,
+          fontWeight: 700,
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(212,166,42,0.35)",
+          opacity: busy ? 0.7 : 1,
+        }}
+      >
+        {labels.submit} ✨
       </button>
     </div>
   );

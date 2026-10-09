@@ -22,6 +22,8 @@ export type InviteView = {
   imageUrl: string;
   address: string;
   greeting: string;
+  eventDate: string | null;
+  eventTime: string | null;
   attendeeCount: number | null;
 };
 
@@ -48,10 +50,19 @@ export async function getInviteView(token: string): Promise<InviteResult> {
 
   const { data: event } = await supabase
     .from("event")
-    .select("language, image_url, address, greeting, is_active")
+    .select("language, image_url, address, greeting, event_date, event_time, is_active")
     .eq("id", guest.event_id)
     .maybeSingle<
-      Pick<EventRow, "language" | "image_url" | "address" | "greeting" | "is_active">
+      Pick<
+        EventRow,
+        | "language"
+        | "image_url"
+        | "address"
+        | "greeting"
+        | "event_date"
+        | "event_time"
+        | "is_active"
+      >
     >();
 
   if (!event) {
@@ -78,6 +89,8 @@ export async function getInviteView(token: string): Promise<InviteResult> {
       imageUrl: event.image_url,
       address: event.address,
       greeting: event.greeting,
+      eventDate: event.event_date,
+      eventTime: event.event_time,
       attendeeCount: rsvp?.attendee_count ?? null,
     },
   };

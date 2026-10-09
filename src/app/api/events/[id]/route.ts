@@ -34,6 +34,8 @@ export async function PATCH(
   if (parsed.data.imageUrl !== undefined) update.image_url = parsed.data.imageUrl;
   if (parsed.data.address !== undefined) update.address = parsed.data.address;
   if (parsed.data.greeting !== undefined) update.greeting = parsed.data.greeting;
+  if (parsed.data.eventDate !== undefined) update.event_date = parsed.data.eventDate;
+  if (parsed.data.eventTime !== undefined) update.event_time = parsed.data.eventTime;
   if (parsed.data.isActive !== undefined) update.is_active = parsed.data.isActive;
 
   const { data, error } = await supabase

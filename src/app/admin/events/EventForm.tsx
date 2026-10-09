@@ -12,9 +12,18 @@ export type EventFormValues = {
   imageUrl: string;
   address: string;
   greeting: string;
+  eventDate: string; // yyyy-mm-dd
+  eventTime: string; // HH:MM
 };
 
-type FieldErrors = Partial<Record<"language" | "imageUrl" | "address" | "greeting", string[]>>;
+type FieldKey =
+  | "language"
+  | "imageUrl"
+  | "address"
+  | "greeting"
+  | "eventDate"
+  | "eventTime";
+type FieldErrors = Partial<Record<FieldKey, string[]>>;
 
 export function EventForm({ initial }: { initial?: EventFormValues }) {
   const router = useRouter();
@@ -24,6 +33,8 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
   const [greeting, setGreeting] = useState(initial?.greeting ?? "");
+  const [eventDate, setEventDate] = useState(initial?.eventDate ?? "");
+  const [eventTime, setEventTime] = useState(initial?.eventTime ?? "");
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -35,9 +46,6 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
     setFormError(null);
     try {
       const supabase = createSupabaseBrowserClient();
-      // Build a safe object path from the UUID + a sanitized extension only.
-      // The original filename can contain spaces or non-ASCII characters that
-      // Storage rejects with "Invalid path specified in request URL".
       const extMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name);
       const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
       const path = `${crypto.randomUUID()}${ext}`;
@@ -62,7 +70,7 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
     setErrors({});
     setFormError(null);
 
-    const payload = { language, imageUrl, address, greeting };
+    const payload = { language, imageUrl, address, greeting, eventDate, eventTime };
     const url = isEdit ? `/api/events/${initial!.id}` : "/api/events";
     const method = isEdit ? "PATCH" : "POST";
 
@@ -87,13 +95,28 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
     }
   }
 
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    marginBottom: 12,
+    fontWeight: 600,
+  };
+  const inputStyle: React.CSSProperties = {
+    display: "block",
+    width: "100%",
+    padding: "8px 10px",
+    marginTop: 4,
+    fontWeight: 400,
+    boxSizing: "border-box",
+  };
+
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
       <h1>{isEdit ? "Edit event" : "New event"}</h1>
 
-      <label>
+      <label style={labelStyle}>
         Language
         <select
+          style={inputStyle}
           value={language}
           onChange={(e) => setLanguage(e.target.value as "he" | "en")}
         >
@@ -101,11 +124,11 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
           <option value="he">Hebrew</option>
         </select>
       </label>
-      {errors.language ? <p role="alert">{errors.language.join(", ")}</p> : null}
 
-      <label>
+      <label style={labelStyle}>
         Event image
         <input
+          style={inputStyle}
           type="file"
           accept="image/*"
           onChange={(e) => {
@@ -117,13 +140,14 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
       {uploading ? <p>Uploading image...</p> : null}
       {imageUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt="Event" style={{ maxWidth: "100%", marginTop: 8 }} />
+        <img src={imageUrl} alt="Event" style={{ maxWidth: "100%", marginBottom: 12 }} />
       ) : null}
       {errors.imageUrl ? <p role="alert">{errors.imageUrl.join(", ")}</p> : null}
 
-      <label>
+      <label style={labelStyle}>
         Full address
         <input
+          style={inputStyle}
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
@@ -131,9 +155,36 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
       </label>
       {errors.address ? <p role="alert">{errors.address.join(", ")}</p> : null}
 
-      <label>
+      <div style={{ display: "flex", gap: 12 }}>
+        <label style={{ ...labelStyle, flex: 1 }}>
+          Event date
+          <input
+            style={inputStyle}
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+          />
+        </label>
+        <label style={{ ...labelStyle, flex: 1 }}>
+          Event time
+          <input
+            style={inputStyle}
+            type="time"
+            value={eventTime}
+            onChange={(e) => setEventTime(e.target.value)}
+          />
+        </label>
+      </div>
+      {errors.eventDate ? <p role="alert">{errors.eventDate.join(", ")}</p> : null}
+      {errors.eventTime ? <p role="alert">{errors.eventTime.join(", ")}</p> : null}
+
+      <label style={labelStyle}>
         Greeting
-        <textarea value={greeting} onChange={(e) => setGreeting(e.target.value)} />
+        <textarea
+          style={{ ...inputStyle, minHeight: 80 }}
+          value={greeting}
+          onChange={(e) => setGreeting(e.target.value)}
+        />
       </label>
       {errors.greeting ? <p role="alert">{errors.greeting.join(", ")}</p> : null}
 

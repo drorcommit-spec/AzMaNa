@@ -11,6 +11,36 @@ export function buildNavigationLink(address: string): string {
 }
 
 /**
+ * Builds a Waze deep link that searches for the given address. Opens the Waze
+ * app on mobile when installed, otherwise the Waze web app.
+ */
+export function buildWazeLink(address: string): string {
+  const query = encodeURIComponent(address.trim());
+  return `https://waze.com/ul?q=${query}&navigate=yes`;
+}
+
+/**
+ * Formats a yyyy-mm-dd date string for display in the given locale.
+ * Returns an empty string when no date is provided.
+ */
+export function formatEventDate(
+  isoDate: string | null,
+  localeTag: string,
+): string {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return new Intl.DateTimeFormat(localeTag, {
+    weekday: "long",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+/**
  * Default attendee count for the invite control: the guest's predicted value
  * bounded to the allowed range [0, 10].
  * Requirements: 7.1

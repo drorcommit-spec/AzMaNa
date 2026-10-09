@@ -7,6 +7,8 @@ export type EventRow = {
   image_url: string;
   address: string;
   greeting: string;
+  event_date: string | null;
+  event_time: string | null;
   is_active: boolean;
   created_at: string;
 };
