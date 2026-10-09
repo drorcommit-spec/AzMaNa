@@ -35,6 +35,20 @@ export default async function RsvpsPage({
   const guests = (data ?? []) as GuestWithRsvp[];
   const total = guests.reduce((sum, g) => sum + (attendeeOf(g) ?? 0), 0);
 
+  const th: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "2px solid #ddd",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
+  const td: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "1px solid #eee",
+    verticalAlign: "middle",
+  };
+
   return (
     <div>
       <h1>RSVPs</h1>
@@ -42,12 +56,12 @@ export default async function RsvpsPage({
         Total confirmed attendees: <strong>{total}</strong>
       </p>
 
-      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900 }}>
         <thead>
           <tr>
-            <th>Guest</th>
-            <th>Predicted</th>
-            <th>Confirmed</th>
+            <th style={th}>Guest</th>
+            <th style={th}>Predicted</th>
+            <th style={th}>Confirmed</th>
           </tr>
         </thead>
         <tbody>
@@ -55,17 +69,19 @@ export default async function RsvpsPage({
             const confirmed = attendeeOf(g);
             return (
               <tr key={g.id}>
-                <td>
+                <td style={td}>
                   {g.first_name} {g.last_name}
                 </td>
-                <td>{g.predicted_guests}</td>
-                <td>{confirmed === null ? "No response" : confirmed}</td>
+                <td style={td}>{g.predicted_guests}</td>
+                <td style={td}>{confirmed === null ? "No response" : confirmed}</td>
               </tr>
             );
           })}
           {guests.length === 0 ? (
             <tr>
-              <td colSpan={3}>No guests yet.</td>
+              <td style={td} colSpan={3}>
+                No guests yet.
+              </td>
             </tr>
           ) : null}
         </tbody>

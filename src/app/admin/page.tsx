@@ -21,6 +21,20 @@ export default async function AdminHomePage() {
     "id" | "address" | "language" | "is_active" | "created_at"
   >[];
 
+  const th: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "2px solid #ddd",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
+  const td: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "1px solid #eee",
+    verticalAlign: "middle",
+  };
+
   return (
     <div>
       <div
@@ -34,33 +48,35 @@ export default async function AdminHomePage() {
         <Link href="/admin/events/new">+ New event</Link>
       </div>
 
-      <table style={{ borderCollapse: "collapse", width: "100%", marginTop: 12 }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900, marginTop: 12 }}>
         <thead>
           <tr>
-            <th>Address</th>
-            <th>Language</th>
-            <th>Status</th>
-            <th></th>
+            <th style={th}>Address</th>
+            <th style={th}>Language</th>
+            <th style={th}>Status</th>
+            <th style={{ ...th, textAlign: "right" }}></th>
           </tr>
         </thead>
         <tbody>
           {events.map((e) => (
             <tr key={e.id}>
-              <td>
+              <td style={td}>
                 <Link href={`/admin/events/${e.id}`}>{e.address}</Link>
               </td>
-              <td>{e.language === "he" ? "Hebrew" : "English"}</td>
-              <td>
+              <td style={td}>{e.language === "he" ? "Hebrew" : "English"}</td>
+              <td style={td}>
                 <ActiveToggle eventId={e.id} initialActive={e.is_active} />
               </td>
-              <td>
+              <td style={{ ...td, textAlign: "right" }}>
                 <Link href={`/admin/events/${e.id}/rsvps`}>RSVPs</Link>
               </td>
             </tr>
           ))}
           {events.length === 0 ? (
             <tr>
-              <td colSpan={4}>No events yet. Create your first one.</td>
+              <td style={td} colSpan={4}>
+                No events yet. Create your first one.
+              </td>
             </tr>
           ) : null}
         </tbody>

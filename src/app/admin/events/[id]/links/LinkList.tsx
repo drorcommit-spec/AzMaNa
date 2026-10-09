@@ -40,40 +40,56 @@ export function LinkList({
     setTimeout(() => setCopied(false), 1500);
   }
 
+  const th: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "2px solid #ddd",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
+  const td: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "1px solid #eee",
+    verticalAlign: "middle",
+  };
+
   return (
     <div>
       <h1>Invite links</h1>
       <p>Select guests and copy their links to paste into WhatsApp.</p>
 
-      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900 }}>
         <thead>
           <tr>
-            <th></th>
-            <th>Guest</th>
-            <th>Invite link</th>
+            <th style={{ ...th, width: 32 }}></th>
+            <th style={th}>Guest</th>
+            <th style={th}>Invite link</th>
           </tr>
         </thead>
         <tbody>
           {guests.map((g) => (
             <tr key={g.id}>
-              <td>
+              <td style={td}>
                 <input
                   type="checkbox"
                   checked={Boolean(selected[g.id])}
                   onChange={() => toggle(g.id)}
                 />
               </td>
-              <td>
+              <td style={td}>
                 {g.first_name} {g.last_name}
               </td>
-              <td>
+              <td style={td}>
                 <code>{linkFor(g.token)}</code>
               </td>
             </tr>
           ))}
           {guests.length === 0 ? (
             <tr>
-              <td colSpan={3}>No guests yet.</td>
+              <td style={td} colSpan={3}>
+                No guests yet.
+              </td>
             </tr>
           ) : null}
         </tbody>

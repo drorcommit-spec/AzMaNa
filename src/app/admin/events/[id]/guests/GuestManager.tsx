@@ -78,30 +78,44 @@ export function GuestManager({
     }
   }
 
+  const th: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "2px solid #ddd",
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+  };
+  const td: React.CSSProperties = {
+    textAlign: "left",
+    padding: "8px 12px",
+    borderBottom: "1px solid #eee",
+    verticalAlign: "middle",
+  };
+
   return (
     <div>
       <h1>Guests</h1>
 
-      <table style={{ borderCollapse: "collapse", width: "100%" }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900 }}>
         <thead>
           <tr>
-            <th>First</th>
-            <th>Last</th>
-            <th>Mobile</th>
-            <th>Predicted</th>
-            <th>Family</th>
-            <th></th>
+            <th style={th}>First</th>
+            <th style={th}>Last</th>
+            <th style={th}>Mobile</th>
+            <th style={th}>Predicted</th>
+            <th style={th}>Family</th>
+            <th style={{ ...th, textAlign: "right" }}></th>
           </tr>
         </thead>
         <tbody>
           {guests.map((g) => (
             <tr key={g.id}>
-              <td>{g.first_name}</td>
-              <td>{g.last_name}</td>
-              <td>{g.mobile}</td>
-              <td>{g.predicted_guests}</td>
-              <td>{g.family_relation ?? ""}</td>
-              <td>
+              <td style={td}>{g.first_name}</td>
+              <td style={td}>{g.last_name}</td>
+              <td style={td}>{g.mobile}</td>
+              <td style={td}>{g.predicted_guests}</td>
+              <td style={td}>{g.family_relation ?? ""}</td>
+              <td style={{ ...td, textAlign: "right" }}>
                 <button onClick={() => removeGuest(g.id)} disabled={busy}>
                   Remove
                 </button>
@@ -110,7 +124,9 @@ export function GuestManager({
           ))}
           {guests.length === 0 ? (
             <tr>
-              <td colSpan={6}>No guests yet.</td>
+              <td style={td} colSpan={6}>
+                No guests yet.
+              </td>
             </tr>
           ) : null}
         </tbody>
