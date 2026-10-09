@@ -22,6 +22,7 @@ export type GuestRow = {
   predicted_guests: number;
   family_relation: string | null;
   token: string;
+  invite_sent_at: string | null;
   created_at: string;
 };
 
