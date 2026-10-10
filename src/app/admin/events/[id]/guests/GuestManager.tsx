@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { csvToGuests, guestsToCsv } from "@/lib/guests/csv";
 
 export type Guest = {
   id: string;
@@ -44,6 +45,54 @@ export function GuestManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>(EMPTY);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Import/export state.
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+
+  function exportCsv() {
+    const csv = guestsToCsv(guests);
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "guests.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importCsv(file: File) {
+    setImportMsg(null);
+    setBusy(true);
+    try {
+      const text = await file.text();
+      const { rows, skipped: parseSkipped } = csvToGuests(text);
+      if (rows.length === 0) {
+        setImportMsg(`No valid rows found in the file.`);
+        return;
+      }
+      const res = await fetch(`/api/events/${eventId}/guests/import`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guests: rows }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setImportMsg(data.error ?? "Import failed.");
+        return;
+      }
+      const skippedTotal = (data.skipped ?? 0) + parseSkipped;
+      setImportMsg(
+        `Imported ${data.added} guest(s). Skipped ${skippedTotal} (duplicates or invalid).`,
+      );
+      router.refresh();
+    } finally {
+      setBusy(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
 
   async function addGuest(e: React.FormEvent) {
     e.preventDefault();
@@ -157,6 +206,35 @@ export function GuestManager({
   return (
     <div>
       <h1>Guests</h1>
+
+      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
+        <button type="button" onClick={exportCsv} disabled={guests.length === 0}>
+          Export CSV
+        </button>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+        >
+          Import CSV
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,text/csv"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void importCsv(f);
+          }}
+        />
+        <span style={{ fontSize: 13, color: "#777" }}>
+          Columns: first_name, last_name, mobile, predicted_guests, family_relation
+        </span>
+      </div>
+      {importMsg ? (
+        <p style={{ color: "#2e8b57" }}>{importMsg}</p>
+      ) : null}
 
       <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 980 }}>
         <thead>

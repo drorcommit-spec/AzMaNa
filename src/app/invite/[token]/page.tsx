@@ -1,10 +1,6 @@
 import { getInviteView } from "@/lib/invite/getInviteView";
 import { getDictionary, directionFor } from "@/lib/i18n/dictionary";
-import {
-  buildWazeLink,
-  defaultAttendeeCount,
-  formatEventDate,
-} from "@/lib/invite/helpers";
+import { buildWazeLink, formatEventDate } from "@/lib/invite/helpers";
 import { RsvpForm } from "./RsvpForm";
 
 // Always render fresh so the page reflects the event's current active state
@@ -50,8 +46,9 @@ export default async function InvitePage({
   const dir = directionFor(view.language);
   const wazeLink = buildWazeLink(view.address);
   const dateText = formatEventDate(view.eventDate, t.dateLocale);
-  const initialCount =
-    view.attendeeCount ?? defaultAttendeeCount(view.predictedGuests);
+  // Default to 0 so the guest must actively choose a number before confirming.
+  // If the guest already responded, show their saved value.
+  const initialCount = view.attendeeCount ?? 0;
 
   return (
     <main
