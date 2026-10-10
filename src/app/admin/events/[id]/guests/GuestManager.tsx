@@ -20,6 +20,14 @@ const EMPTY = {
   familyRelation: "",
 };
 
+type EditForm = {
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  predictedGuests: number;
+  familyRelation: string;
+};
+
 export function GuestManager({
   eventId,
   guests,
@@ -31,6 +39,11 @@ export function GuestManager({
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Inline edit state: which row is being edited, and its draft values.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditForm>(EMPTY);
+  const [editError, setEditError] = useState<string | null>(null);
 
   async function addGuest(e: React.FormEvent) {
     e.preventDefault();
@@ -54,6 +67,50 @@ export function GuestManager({
         return;
       }
       setForm(EMPTY);
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function startEdit(g: Guest) {
+    setEditingId(g.id);
+    setEditError(null);
+    setEditForm({
+      firstName: g.first_name,
+      lastName: g.last_name,
+      mobile: g.mobile,
+      predictedGuests: g.predicted_guests,
+      familyRelation: g.family_relation ?? "",
+    });
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditError(null);
+  }
+
+  async function saveEdit(gid: string) {
+    setBusy(true);
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/${gid}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: editForm.firstName,
+          lastName: editForm.lastName,
+          mobile: editForm.mobile,
+          predictedGuests: Number(editForm.predictedGuests),
+          familyRelation: editForm.familyRelation || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setEditError(data.error ?? "Could not save guest.");
+        return;
+      }
+      setEditingId(null);
       router.refresh();
     } finally {
       setBusy(false);
@@ -91,12 +148,17 @@ export function GuestManager({
     borderBottom: "1px solid #eee",
     verticalAlign: "middle",
   };
+  const cellInput: React.CSSProperties = {
+    width: "100%",
+    padding: "4px 6px",
+    boxSizing: "border-box",
+  };
 
   return (
     <div>
       <h1>Guests</h1>
 
-      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900 }}>
+      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 980 }}>
         <thead>
           <tr>
             <th style={th}>First</th>
@@ -104,24 +166,98 @@ export function GuestManager({
             <th style={th}>Mobile</th>
             <th style={th}>Predicted</th>
             <th style={th}>Family</th>
-            <th style={{ ...th, textAlign: "right" }}></th>
+            <th style={{ ...th, textAlign: "right" }}>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {guests.map((g) => (
-            <tr key={g.id}>
-              <td style={td}>{g.first_name}</td>
-              <td style={td}>{g.last_name}</td>
-              <td style={td}>{g.mobile}</td>
-              <td style={td}>{g.predicted_guests}</td>
-              <td style={td}>{g.family_relation ?? ""}</td>
-              <td style={{ ...td, textAlign: "right" }}>
-                <button onClick={() => removeGuest(g.id)} disabled={busy}>
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
+          {guests.map((g) => {
+            const editing = editingId === g.id;
+            return (
+              <tr key={g.id}>
+                {editing ? (
+                  <>
+                    <td style={td}>
+                      <input
+                        style={cellInput}
+                        value={editForm.firstName}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, firstName: e.target.value })
+                        }
+                      />
+                    </td>
+                    <td style={td}>
+                      <input
+                        style={cellInput}
+                        value={editForm.lastName}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, lastName: e.target.value })
+                        }
+                      />
+                    </td>
+                    <td style={td}>
+                      <input
+                        style={cellInput}
+                        value={editForm.mobile}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, mobile: e.target.value })
+                        }
+                      />
+                    </td>
+                    <td style={td}>
+                      <input
+                        style={cellInput}
+                        type="number"
+                        min={0}
+                        value={editForm.predictedGuests}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            predictedGuests: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </td>
+                    <td style={td}>
+                      <input
+                        style={cellInput}
+                        value={editForm.familyRelation}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            familyRelation: e.target.value,
+                          })
+                        }
+                      />
+                    </td>
+                    <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
+                      <button onClick={() => saveEdit(g.id)} disabled={busy}>
+                        Save
+                      </button>{" "}
+                      <button onClick={cancelEdit} disabled={busy}>
+                        Cancel
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td style={td}>{g.first_name}</td>
+                    <td style={td}>{g.last_name}</td>
+                    <td style={td}>{g.mobile}</td>
+                    <td style={td}>{g.predicted_guests}</td>
+                    <td style={td}>{g.family_relation ?? ""}</td>
+                    <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
+                      <button onClick={() => startEdit(g)} disabled={busy}>
+                        Edit
+                      </button>{" "}
+                      <button onClick={() => removeGuest(g.id)} disabled={busy}>
+                        Remove
+                      </button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
           {guests.length === 0 ? (
             <tr>
               <td style={td} colSpan={6}>
@@ -131,6 +267,12 @@ export function GuestManager({
           ) : null}
         </tbody>
       </table>
+
+      {editError ? (
+        <p role="alert" style={{ color: "crimson" }}>
+          {editError}
+        </p>
+      ) : null}
 
       <h2>Add guest</h2>
       <form onSubmit={addGuest} style={{ display: "grid", gap: 8, maxWidth: 420 }}>
