@@ -83,9 +83,22 @@ export default async function InvitePage({
         />
 
         <div style={{ padding: "16px 10px 8px" }}>
-          <h1 style={{ fontSize: 22, margin: "0 0 12px", fontWeight: 700 }}>
+          <h1 style={{ fontSize: 22, margin: "0 0 6px", fontWeight: 700 }}>
             {t.greetingHello(view.firstName, view.lastName)} 🎉
           </h1>
+
+          {view.eventName ? (
+            <p
+              style={{
+                margin: "0 0 12px",
+                fontSize: 18,
+                fontWeight: 600,
+                color: "#d4a62a",
+              }}
+            >
+              {view.eventName}
+            </p>
+          ) : null}
 
           {view.greeting ? (
             <p style={{ margin: "0 0 16px", color: "#444", lineHeight: 1.5 }}>

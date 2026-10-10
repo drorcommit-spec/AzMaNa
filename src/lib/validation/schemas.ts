@@ -17,6 +17,7 @@ const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date");
 const timeSchema = z.string().regex(/^\d{2}:\d{2}$/, "Invalid time");
 
 export const eventCreateSchema = z.object({
+  name: z.string().min(1, "Event name is required"),
   language: eventLanguageSchema,
   imageUrl: z.string().min(1, "Image is required"),
   address: z.string().min(1, "Address is required"),
@@ -29,6 +30,7 @@ export type EventCreateInput = z.infer<typeof eventCreateSchema>;
 // Event update: settings may change; active state toggled (Req 2.5, 8.2, 8.3)
 export const eventUpdateSchema = z
   .object({
+    name: z.string().min(1).optional(),
     language: eventLanguageSchema.optional(),
     imageUrl: z.string().min(1).optional(),
     address: z.string().min(1).optional(),

@@ -25,12 +25,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const { language, imageUrl, address, greeting, eventDate, eventTime } =
+  const { name, language, imageUrl, address, greeting, eventDate, eventTime } =
     parsed.data;
   const { data, error } = await supabase
     .from("event")
     .insert({
       owner_id: user.id,
+      name,
       language,
       image_url: imageUrl,
       address,

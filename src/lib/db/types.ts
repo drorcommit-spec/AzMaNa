@@ -3,6 +3,7 @@ import type { Locale } from "@/lib/i18n/dictionary";
 export type EventRow = {
   id: string;
   owner_id: string;
+  name: string | null;
   language: Locale;
   image_url: string;
   address: string;

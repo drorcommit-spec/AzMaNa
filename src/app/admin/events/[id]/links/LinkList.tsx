@@ -18,11 +18,13 @@ export type GuestLink = {
 
 export function LinkList({
   eventId,
+  eventName,
   language,
   baseUrl,
   guests,
 }: {
   eventId: string;
+  eventName: string;
   language: "he" | "en";
   baseUrl: string;
   guests: GuestLink[];
@@ -78,7 +80,12 @@ export function LinkList({
   }
 
   function openWhatsapp(g: GuestLink) {
-    const msg = buildInviteMessage(language, g.first_name, linkFor(g.token));
+    const msg = buildInviteMessage(
+      language,
+      g.first_name,
+      linkFor(g.token),
+      eventName,
+    );
     const url = buildWhatsappLink(g.mobile, msg);
     window.open(url, "_blank", "noopener,noreferrer");
     void markSent(g.id);

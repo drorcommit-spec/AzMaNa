@@ -13,9 +13,9 @@ export default async function LinksPage({
 
   const { data: event } = await supabase
     .from("event")
-    .select("language")
+    .select("name, language")
     .eq("id", params.id)
-    .maybeSingle<Pick<EventRow, "language">>();
+    .maybeSingle<Pick<EventRow, "name" | "language">>();
 
   const { data } = await supabase
     .from("guest")
@@ -28,6 +28,7 @@ export default async function LinksPage({
   return (
     <LinkList
       eventId={params.id}
+      eventName={event?.name ?? ""}
       language={event?.language ?? "en"}
       baseUrl={baseUrl}
       guests={(data ?? []) as GuestLink[]}

@@ -8,6 +8,7 @@ const BUCKET = process.env.NEXT_PUBLIC_SUPABASE_IMAGE_BUCKET ?? "event-images";
 
 export type EventFormValues = {
   id?: string;
+  name: string;
   language: "he" | "en";
   imageUrl: string;
   address: string;
@@ -17,6 +18,7 @@ export type EventFormValues = {
 };
 
 type FieldKey =
+  | "name"
   | "language"
   | "imageUrl"
   | "address"
@@ -29,6 +31,7 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
 
+  const [name, setName] = useState(initial?.name ?? "");
   const [language, setLanguage] = useState<"he" | "en">(initial?.language ?? "en");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [address, setAddress] = useState(initial?.address ?? "");
@@ -70,7 +73,7 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
     setErrors({});
     setFormError(null);
 
-    const payload = { language, imageUrl, address, greeting, eventDate, eventTime };
+    const payload = { name, language, imageUrl, address, greeting, eventDate, eventTime };
     const url = isEdit ? `/api/events/${initial!.id}` : "/api/events";
     const method = isEdit ? "PATCH" : "POST";
 
@@ -112,6 +115,18 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
   return (
     <form onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
       <h1>{isEdit ? "Edit event" : "New event"}</h1>
+
+      <label style={labelStyle}>
+        Event name
+        <input
+          style={inputStyle}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Guy's Bar Mitzvah"
+        />
+      </label>
+      {errors.name ? <p role="alert">{errors.name.join(", ")}</p> : null}
 
       <label style={labelStyle}>
         Language

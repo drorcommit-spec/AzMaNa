@@ -30,6 +30,7 @@ export async function PATCH(
   }
 
   const update: Record<string, unknown> = {};
+  if (parsed.data.name !== undefined) update.name = parsed.data.name;
   if (parsed.data.language !== undefined) update.language = parsed.data.language;
   if (parsed.data.imageUrl !== undefined) update.image_url = parsed.data.imageUrl;
   if (parsed.data.address !== undefined) update.address = parsed.data.address;

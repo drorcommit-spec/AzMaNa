@@ -91,9 +91,12 @@ export function buildInviteMessage(
   locale: "he" | "en",
   firstName: string,
   inviteUrl: string,
+  eventName?: string,
 ): string {
   if (locale === "he") {
-    return `שלום ${firstName}, הוזמנת לאירוע שלנו! לצפייה בהזמנה ולאישור הגעה: ${inviteUrl}`;
+    const eventPart = eventName ? ` "${eventName}"` : "";
+    return `שלום ${firstName}, הוזמנת לאירוע שלנו${eventPart}! לצפייה בהזמנה ולאישור הגעה: ${inviteUrl}`;
   }
-  return `Hello ${firstName}, you're invited to our event! View your invitation and RSVP here: ${inviteUrl}`;
+  const eventPart = eventName ? ` "${eventName}"` : "";
+  return `Hello ${firstName}, you're invited to our event${eventPart}! View your invitation and RSVP here: ${inviteUrl}`;
 }

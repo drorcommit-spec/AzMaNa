@@ -19,6 +19,7 @@ export type InviteView = {
   lastName: string;
   predictedGuests: number;
   language: Locale;
+  eventName: string | null;
   imageUrl: string;
   address: string;
   greeting: string;
@@ -50,11 +51,12 @@ export async function getInviteView(token: string): Promise<InviteResult> {
 
   const { data: event } = await supabase
     .from("event")
-    .select("language, image_url, address, greeting, event_date, event_time, is_active")
+    .select("name, language, image_url, address, greeting, event_date, event_time, is_active")
     .eq("id", guest.event_id)
     .maybeSingle<
       Pick<
         EventRow,
+        | "name"
         | "language"
         | "image_url"
         | "address"
@@ -86,6 +88,7 @@ export async function getInviteView(token: string): Promise<InviteResult> {
       lastName: guest.last_name,
       predictedGuests: guest.predicted_guests,
       language: event.language,
+      eventName: event.name,
       imageUrl: event.image_url,
       address: event.address,
       greeting: event.greeting,

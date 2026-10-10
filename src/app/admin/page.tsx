@@ -13,12 +13,12 @@ export default async function AdminHomePage() {
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("event")
-    .select("id, address, language, is_active, created_at")
+    .select("id, name, address, language, is_active, created_at")
     .order("created_at", { ascending: false });
 
   const events = (data ?? []) as Pick<
     EventRow,
-    "id" | "address" | "language" | "is_active" | "created_at"
+    "id" | "name" | "address" | "language" | "is_active" | "created_at"
   >[];
 
   const th: React.CSSProperties = {
@@ -51,6 +51,7 @@ export default async function AdminHomePage() {
       <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900, marginTop: 12 }}>
         <thead>
           <tr>
+            <th style={th}>Event</th>
             <th style={th}>Address</th>
             <th style={th}>Language</th>
             <th style={th}>Status</th>
@@ -61,8 +62,11 @@ export default async function AdminHomePage() {
           {events.map((e) => (
             <tr key={e.id}>
               <td style={td}>
-                <Link href={`/admin/events/${e.id}`}>{e.address}</Link>
+                <Link href={`/admin/events/${e.id}`}>
+                  {e.name || "(untitled event)"}
+                </Link>
               </td>
+              <td style={td}>{e.address}</td>
               <td style={td}>{e.language === "he" ? "Hebrew" : "English"}</td>
               <td style={td}>
                 <ActiveToggle eventId={e.id} initialActive={e.is_active} />
@@ -74,7 +78,7 @@ export default async function AdminHomePage() {
           ))}
           {events.length === 0 ? (
             <tr>
-              <td style={td} colSpan={4}>
+              <td style={td} colSpan={5}>
                 No events yet. Create your first one.
               </td>
             </tr>
