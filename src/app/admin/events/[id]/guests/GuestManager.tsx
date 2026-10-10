@@ -206,13 +206,15 @@ export function GuestManager({
                     <td style={td}>
                       <input
                         style={cellInput}
-                        type="number"
-                        min={0}
+                        type="text"
+                        inputMode="numeric"
                         value={editForm.predictedGuests}
                         onChange={(e) =>
                           setEditForm({
                             ...editForm,
-                            predictedGuests: Number(e.target.value),
+                            predictedGuests: Number(
+                              e.target.value.replace(/\D/g, ""),
+                            ),
                           })
                         }
                       />
@@ -295,12 +297,15 @@ export function GuestManager({
           required
         />
         <input
-          type="number"
-          min={0}
+          type="text"
+          inputMode="numeric"
           placeholder="Predicted guests"
           value={form.predictedGuests}
           onChange={(e) =>
-            setForm({ ...form, predictedGuests: Number(e.target.value) })
+            setForm({
+              ...form,
+              predictedGuests: Number(e.target.value.replace(/\D/g, "")),
+            })
           }
         />
         <input

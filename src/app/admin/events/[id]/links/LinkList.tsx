@@ -41,6 +41,19 @@ export function LinkList({
   const linkFor = (token: string) => `${baseUrl}/invite/${token}`;
   const isSent = (g: GuestLink) => Boolean(g.invite_sent_at) || sentNow[g.id];
 
+  // Formats the stored ISO timestamp as a local dd/mm/yyyy HH:MM string.
+  const formatSentAt = (iso: string) => {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "Sent";
+    return new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
+  };
+
   const anySelected = useMemo(
     () => guests.some((g) => selected[g.id]),
     [guests, selected],
@@ -220,7 +233,7 @@ export function LinkList({
               />
             </th>
             <th style={th}>Guest</th>
-            <th style={th}>Status</th>
+            <th style={th}>Last sent</th>
             <th style={{ ...th, textAlign: "right" }}>Send</th>
           </tr>
         </thead>
@@ -239,8 +252,14 @@ export function LinkList({
                 <div style={{ color: "#888", fontSize: 13 }}>{g.mobile}</div>
               </td>
               <td style={td}>
-                {isSent(g) ? (
-                  <span style={{ color: "#2e8b57", fontWeight: 600 }}>Sent</span>
+                {g.invite_sent_at ? (
+                  <span style={{ color: "#2e8b57", fontWeight: 600 }}>
+                    {formatSentAt(g.invite_sent_at)}
+                  </span>
+                ) : sentNow[g.id] ? (
+                  <span style={{ color: "#2e8b57", fontWeight: 600 }}>
+                    Just now
+                  </span>
                 ) : (
                   <span style={{ color: "#999" }}>Not sent</span>
                 )}
