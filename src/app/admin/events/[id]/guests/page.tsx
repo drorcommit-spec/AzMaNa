@@ -1,6 +1,8 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { GuestManager, type Guest } from "./GuestManager";
 
+export const dynamic = "force-dynamic";
+
 export default async function GuestsPage({
   params,
 }: {

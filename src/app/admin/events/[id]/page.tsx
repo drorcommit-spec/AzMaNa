@@ -4,6 +4,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { EventRow } from "@/lib/db/types";
 import { EventForm } from "../EventForm";
 
+// Always load the current values from the DB so the edit form is never stale.
+export const dynamic = "force-dynamic";
+
 export default async function EditEventPage({
   params,
 }: {
