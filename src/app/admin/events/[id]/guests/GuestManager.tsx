@@ -316,8 +316,7 @@ export function GuestManager({
       return <span style={{ color: "#2b6fd6" }}>Opened</span>;
     }
     if (isSent(g)) {
-      const stamp = formatStamp(g.invite_sent_at);
-      return <span style={{ color: "#888" }}>Sent{stamp ? ` ${stamp}` : ""}</span>;
+      return <span style={{ color: "#888" }}>Sent</span>;
     }
     return <span style={{ color: "#bbb" }}>Not sent</span>;
   }
@@ -382,6 +381,7 @@ export function GuestManager({
               <th style={th}>Predicted</th>
               <th style={th}>Family</th>
               <th style={th}>Status</th>
+              <th style={th}>Last sent</th>
               <th style={{ ...th, textAlign: "right" }}>Actions</th>
             </tr>
           </thead>
@@ -409,6 +409,9 @@ export function GuestManager({
                         onChange={(e) => setEditForm({ ...editForm, familyRelation: e.target.value })} />
                     </td>
                     <td style={td}>{statusLabel(g)}</td>
+                    <td style={{ ...td, color: "#888", fontSize: 13 }}>
+                      {sentNow[g.id] ? "Just now" : formatStamp(g.invite_sent_at) ?? "—"}
+                    </td>
                     <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
                       <button onClick={() => saveEdit(g.id)} disabled={busy}>Save</button>{" "}
                       <button onClick={cancelEdit} disabled={busy}>Cancel</button>
@@ -426,6 +429,9 @@ export function GuestManager({
                   <td style={td}>{g.predicted_guests}</td>
                   <td style={td}>{g.family_relation ?? ""}</td>
                   <td style={td}>{statusLabel(g)}</td>
+                  <td style={{ ...td, color: "#888", fontSize: 13 }}>
+                    {sentNow[g.id] ? "Just now" : formatStamp(g.invite_sent_at) ?? "—"}
+                  </td>
                   <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openWhatsapp(g)} style={waBtn}>WhatsApp</button>{" "}
                     <button onClick={() => startEdit(g)} disabled={busy}>Edit</button>{" "}
@@ -436,7 +442,7 @@ export function GuestManager({
             })}
             {guests.length === 0 ? (
               <tr>
-                <td style={td} colSpan={6}>No guests yet.</td>
+                <td style={td} colSpan={7}>No guests yet.</td>
               </tr>
             ) : null}
           </tbody>
