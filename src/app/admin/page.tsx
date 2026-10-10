@@ -73,10 +73,6 @@ export default async function AdminHomePage() {
               </td>
               <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
                 <Link href={`/admin/events/${e.id}/guests`}>Guests</Link>
-                {" · "}
-                <Link href={`/admin/events/${e.id}/links`}>Invite links</Link>
-                {" · "}
-                <Link href={`/admin/events/${e.id}/rsvps`}>RSVPs</Link>
               </td>
             </tr>
           ))}

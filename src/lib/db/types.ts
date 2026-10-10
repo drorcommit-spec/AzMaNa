@@ -25,6 +25,7 @@ export type GuestRow = {
   family_relation: string | null;
   token: string;
   invite_sent_at: string | null;
+  first_opened_at: string | null;
   created_at: string;
 };
 

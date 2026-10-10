@@ -80,6 +80,13 @@ export async function getInviteView(token: string): Promise<InviteResult> {
     .eq("guest_id", guest.id)
     .maybeSingle<{ attendee_count: number }>();
 
+  // Record first open as an engagement signal (best-effort, non-blocking).
+  await supabase
+    .from("guest")
+    .update({ first_opened_at: new Date().toISOString() })
+    .eq("id", guest.id)
+    .is("first_opened_at", null);
+
   return {
     status: "ok",
     view: {

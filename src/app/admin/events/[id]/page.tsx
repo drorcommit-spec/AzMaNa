@@ -42,8 +42,6 @@ export default async function EditEventPage({
     <div>
       <nav style={{ display: "flex", gap: 12, marginBottom: 16 }}>
         <Link href={`/admin/events/${params.id}/guests`}>Guests</Link>
-        <Link href={`/admin/events/${params.id}/links`}>Invite links</Link>
-        <Link href={`/admin/events/${params.id}/rsvps`}>RSVPs</Link>
       </nav>
       <EventForm
         initial={{
