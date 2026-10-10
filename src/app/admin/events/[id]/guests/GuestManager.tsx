@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { csvToGuests, guestsToCsv } from "@/lib/guests/csv";
+import { csvToGuests, decodeCsvFile, guestsToCsv } from "@/lib/guests/csv";
 
 export type Guest = {
   id: string;
@@ -67,7 +67,7 @@ export function GuestManager({
     setImportMsg(null);
     setBusy(true);
     try {
-      const text = await file.text();
+      const text = await decodeCsvFile(file);
       const { rows, skipped: parseSkipped } = csvToGuests(text);
       if (rows.length === 0) {
         setImportMsg(`No valid rows found in the file.`);

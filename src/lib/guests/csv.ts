@@ -131,3 +131,33 @@ export function csvToGuests(text: string): {
 
   return { rows, skipped };
 }
+
+/**
+ * Reads a CSV file as text, detecting encoding. Many spreadsheets on Hebrew
+ * Windows save CSV as Windows-1255, not UTF-8. We try UTF-8 first (strict);
+ * if it contains the replacement character, we fall back to Windows-1255.
+ * A UTF-8 BOM is stripped if present.
+ */
+export async function decodeCsvFile(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+
+  // Strip UTF-8 BOM if present.
+  const hasBom = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf;
+  const data = hasBom ? bytes.subarray(3) : bytes;
+
+  // Try strict UTF-8 first; it throws on invalid byte sequences.
+  try {
+    const utf8 = new TextDecoder("utf-8", { fatal: true });
+    return utf8.decode(data);
+  } catch {
+    // Fall back to Windows-1255 (Hebrew).
+    try {
+      const he = new TextDecoder("windows-1255");
+      return he.decode(data);
+    } catch {
+      // Last resort: lenient UTF-8.
+      return new TextDecoder("utf-8").decode(data);
+    }
+  }
+}
