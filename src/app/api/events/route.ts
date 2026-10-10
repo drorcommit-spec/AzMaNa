@@ -25,8 +25,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const { name, language, imageUrl, address, greeting, eventDate, eventTime } =
-    parsed.data;
+  const {
+    name,
+    language,
+    imageUrl,
+    address,
+    greeting,
+    eventDate,
+    eventTime,
+    whatsappTemplate,
+  } = parsed.data;
   const { data, error } = await supabase
     .from("event")
     .insert({
@@ -38,6 +46,7 @@ export async function POST(request: Request) {
       greeting,
       event_date: eventDate,
       event_time: eventTime,
+      whatsapp_template: whatsappTemplate ?? null,
     })
     .select("id")
     .single();

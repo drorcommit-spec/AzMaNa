@@ -15,7 +15,9 @@ export default async function EditEventPage({
   const supabase = createSupabaseServerClient();
   const { data } = await supabase
     .from("event")
-    .select("id, name, language, image_url, address, greeting, event_date, event_time")
+    .select(
+      "id, name, language, image_url, address, greeting, event_date, event_time, whatsapp_template",
+    )
     .eq("id", params.id)
     .maybeSingle<
       Pick<
@@ -28,6 +30,7 @@ export default async function EditEventPage({
         | "greeting"
         | "event_date"
         | "event_time"
+        | "whatsapp_template"
       >
     >();
 
@@ -52,6 +55,7 @@ export default async function EditEventPage({
           greeting: data.greeting,
           eventDate: data.event_date ?? "",
           eventTime: data.event_time ?? "",
+          whatsappTemplate: data.whatsapp_template ?? "",
         }}
       />
     </div>

@@ -20,12 +20,18 @@ export function LinkList({
   eventId,
   eventName,
   language,
+  template,
+  eventDate,
+  eventTime,
   baseUrl,
   guests,
 }: {
   eventId: string;
   eventName: string;
   language: "he" | "en";
+  template: string | null;
+  eventDate: string;
+  eventTime: string;
   baseUrl: string;
   guests: GuestLink[];
 }) {
@@ -95,9 +101,15 @@ export function LinkList({
   function openWhatsapp(g: GuestLink) {
     const msg = buildInviteMessage(
       language,
-      g.first_name,
       linkFor(g.token),
-      eventName,
+      {
+        firstName: g.first_name,
+        lastName: g.last_name,
+        eventName,
+        date: eventDate,
+        time: eventTime,
+      },
+      template,
     );
     const url = buildWhatsappLink(g.mobile, msg);
     window.open(url, "_blank", "noopener,noreferrer");

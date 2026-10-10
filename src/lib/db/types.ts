@@ -8,6 +8,7 @@ export type EventRow = {
   image_url: string;
   address: string;
   greeting: string;
+  whatsapp_template: string | null;
   event_date: string | null;
   event_time: string | null;
   is_active: boolean;

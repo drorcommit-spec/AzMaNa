@@ -15,6 +15,7 @@ export type EventFormValues = {
   greeting: string;
   eventDate: string; // yyyy-mm-dd
   eventTime: string; // HH:MM
+  whatsappTemplate: string;
 };
 
 type FieldKey =
@@ -24,7 +25,8 @@ type FieldKey =
   | "address"
   | "greeting"
   | "eventDate"
-  | "eventTime";
+  | "eventTime"
+  | "whatsappTemplate";
 type FieldErrors = Partial<Record<FieldKey, string[]>>;
 
 export function EventForm({ initial }: { initial?: EventFormValues }) {
@@ -38,6 +40,9 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
   const [greeting, setGreeting] = useState(initial?.greeting ?? "");
   const [eventDate, setEventDate] = useState(initial?.eventDate ?? "");
   const [eventTime, setEventTime] = useState(initial?.eventTime ?? "");
+  const [whatsappTemplate, setWhatsappTemplate] = useState(
+    initial?.whatsappTemplate ?? "",
+  );
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -73,7 +78,16 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
     setErrors({});
     setFormError(null);
 
-    const payload = { name, language, imageUrl, address, greeting, eventDate, eventTime };
+    const payload = {
+      name,
+      language,
+      imageUrl,
+      address,
+      greeting,
+      eventDate,
+      eventTime,
+      whatsappTemplate,
+    };
     const url = isEdit ? `/api/events/${initial!.id}` : "/api/events";
     const method = isEdit ? "PATCH" : "POST";
 
@@ -203,7 +217,31 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
       </label>
       {errors.greeting ? <p role="alert">{errors.greeting.join(", ")}</p> : null}
 
-      {formError ? <p role="alert" style={{ color: "crimson" }}>{formError}</p> : null}
+      <label style={labelStyle}>
+        WhatsApp message
+        <textarea
+          style={{ ...inputStyle, minHeight: 90 }}
+          value={whatsappTemplate}
+          onChange={(e) => setWhatsappTemplate(e.target.value)}
+          placeholder={
+            'שלום {firstName}, הוזמנת לאירוע שלנו "{eventName}"! לצפייה בהזמנה ולאישור הגעה:'
+          }
+        />
+        <span style={{ fontWeight: 400, fontSize: 13, color: "#777" }}>
+          Placeholders: {"{firstName}"} {"{lastName}"} {"{eventName}"}{" "}
+          {"{date}"} {"{time}"}. The invite link is added automatically. Leave
+          blank to use the default message.
+        </span>
+      </label>
+      {errors.whatsappTemplate ? (
+        <p role="alert">{errors.whatsappTemplate.join(", ")}</p>
+      ) : null}
+
+      {formError ? (
+        <p role="alert" style={{ color: "crimson" }}>
+          {formError}
+        </p>
+      ) : null}
 
       <button type="submit" disabled={saving || uploading}>
         {saving ? "Saving..." : "Save event"}

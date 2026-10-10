@@ -24,6 +24,7 @@ export const eventCreateSchema = z.object({
   greeting: z.string().min(1, "Greeting is required"),
   eventDate: dateSchema,
   eventTime: timeSchema,
+  whatsappTemplate: z.string().optional(),
 });
 export type EventCreateInput = z.infer<typeof eventCreateSchema>;
 
@@ -37,6 +38,7 @@ export const eventUpdateSchema = z
     greeting: z.string().min(1).optional(),
     eventDate: dateSchema.optional(),
     eventTime: timeSchema.optional(),
+    whatsappTemplate: z.string().optional(),
     isActive: z.boolean().optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {

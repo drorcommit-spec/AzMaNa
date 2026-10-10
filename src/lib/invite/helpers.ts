@@ -87,16 +87,51 @@ export function buildWhatsappLink(mobile: string, message: string): string {
 /**
  * Builds the localized invitation message a guest receives over WhatsApp.
  */
+export type MessageVars = {
+  firstName: string;
+  lastName: string;
+  eventName: string;
+  date: string;
+  time: string;
+};
+
+/**
+ * The default WhatsApp message body (without the link) used when an event has
+ * no custom template. Placeholders are substituted per guest.
+ */
+export function defaultWhatsappTemplate(locale: "he" | "en"): string {
+  if (locale === "he") {
+    return 'שלום {firstName}, הוזמנת לאירוע שלנו "{eventName}"! לצפייה בהזמנה ולאישור הגעה:';
+  }
+  return 'Hello {firstName}, you\'re invited to our event "{eventName}"! View your invitation and RSVP here:';
+}
+
+/**
+ * Substitutes {firstName} {lastName} {eventName} {date} {time} placeholders in
+ * a template with the provided values.
+ */
+export function fillTemplate(template: string, vars: MessageVars): string {
+  return template
+    .replace(/\{firstName\}/g, vars.firstName)
+    .replace(/\{lastName\}/g, vars.lastName)
+    .replace(/\{eventName\}/g, vars.eventName)
+    .replace(/\{date\}/g, vars.date)
+    .replace(/\{time\}/g, vars.time);
+}
+
+/**
+ * Builds the full WhatsApp invitation message: the (optionally custom) template
+ * with placeholders filled, followed by the invite link on a new line.
+ */
 export function buildInviteMessage(
   locale: "he" | "en",
-  firstName: string,
   inviteUrl: string,
-  eventName?: string,
+  vars: MessageVars,
+  template?: string | null,
 ): string {
-  if (locale === "he") {
-    const eventPart = eventName ? ` "${eventName}"` : "";
-    return `שלום ${firstName}, הוזמנת לאירוע שלנו${eventPart}! לצפייה בהזמנה ולאישור הגעה: ${inviteUrl}`;
-  }
-  const eventPart = eventName ? ` "${eventName}"` : "";
-  return `Hello ${firstName}, you're invited to our event${eventPart}! View your invitation and RSVP here: ${inviteUrl}`;
+  const body = (template && template.trim().length > 0
+    ? template
+    : defaultWhatsappTemplate(locale)
+  ).trim();
+  return `${fillTemplate(body, vars)}\n${inviteUrl}`;
 }
