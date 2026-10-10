@@ -10,31 +10,38 @@ export function RsvpForm({
 }: {
   token: string;
   initialCount: number;
-  labels: { attendeesLabel: string; submit: string; submitted: string };
+  labels: {
+    attendeesLabel: string;
+    submit: string;
+    decline: string;
+    declined: string;
+    submitted: string;
+  };
 }) {
   const [count, setCount] = useState(initialCount);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState<null | "attending" | "declined">(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const dec = () => setCount((c) => Math.max(ATTENDEE_MIN, c - 1));
   const inc = () => setCount((c) => Math.min(ATTENDEE_MAX, c + 1));
 
-  async function submit() {
+  async function submit(value: number, kind: "attending" | "declined") {
     setBusy(true);
-    setSaved(false);
+    setSaved(null);
     setError(null);
     try {
       const res = await fetch(`/api/invite/${token}/rsvp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ attendeeCount: count }),
+        body: JSON.stringify({ attendeeCount: value }),
       });
       if (!res.ok) {
         setError("Could not save your response. Please try again.");
         return;
       }
-      setSaved(true);
+      if (kind === "declined") setCount(0);
+      setSaved(kind);
     } finally {
       setBusy(false);
     }
@@ -119,13 +126,16 @@ export function RsvpForm({
           {error}
         </p>
       ) : null}
-      {saved ? (
+      {saved === "attending" ? (
         <p style={{ color: "#2e8b57", fontWeight: 600 }}>{labels.submitted}</p>
+      ) : null}
+      {saved === "declined" ? (
+        <p style={{ color: "#2e8b57", fontWeight: 600 }}>{labels.declined}</p>
       ) : null}
 
       <button
         type="button"
-        onClick={submit}
+        onClick={() => submit(count, "attending")}
         disabled={busy}
         style={{
           width: "100%",
@@ -142,6 +152,26 @@ export function RsvpForm({
         }}
       >
         {labels.submit} ✨
+      </button>
+
+      <button
+        type="button"
+        onClick={() => submit(0, "declined")}
+        disabled={busy}
+        style={{
+          width: "100%",
+          marginTop: 10,
+          padding: "10px 16px",
+          border: "1px solid #ddd",
+          borderRadius: 12,
+          background: "#fff",
+          color: "#777",
+          fontSize: 15,
+          cursor: "pointer",
+          opacity: busy ? 0.7 : 1,
+        }}
+      >
+        {labels.decline}
       </button>
     </div>
   );

@@ -17,6 +17,12 @@ export function createSupabaseServiceClient() {
         autoRefreshToken: false,
         persistSession: false,
       },
+      global: {
+        // Prevent Next.js from caching Supabase REST responses so the invite
+        // page always reflects the latest event settings.
+        fetch: (input, init) =>
+          fetch(input, { ...init, cache: "no-store" }),
+      },
     },
   );
 }

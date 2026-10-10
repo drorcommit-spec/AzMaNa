@@ -19,6 +19,8 @@ type InviteStrings = {
   navigateWaze: string;
   attendeesLabel: string;
   submit: string;
+  decline: string;
+  declined: string;
   submitted: string;
   unavailable: string;
   notFound: string;
@@ -34,6 +36,8 @@ export const dictionary: Record<Locale, InviteStrings> = {
     navigateWaze: "Navigate with Waze",
     attendeesLabel: "How many will arrive?",
     submit: "Confirm attendance",
+    decline: "Sorry, we can't make it",
+    declined: "Thanks for letting us know.",
     submitted: "Thanks! Your response was saved.",
     unavailable: "This invitation is not currently available.",
     notFound: "This invitation link is not valid.",
@@ -46,6 +50,8 @@ export const dictionary: Record<Locale, InviteStrings> = {
     navigateWaze: "ניווט ב-Waze",
     attendeesLabel: "כמה אורחים יגיעו?",
     submit: "אישור הגעה",
+    decline: "לצערי לא נוכל להגיע",
+    declined: "תודה שעדכנת אותנו.",
     submitted: "תודה! התשובה נשמרה.",
     unavailable: "ההזמנה אינה זמינה כעת.",
     notFound: "קישור ההזמנה אינו תקין.",

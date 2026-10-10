@@ -7,8 +7,11 @@ import {
 } from "@/lib/invite/helpers";
 import { RsvpForm } from "./RsvpForm";
 
-// Always render fresh so the page reflects the event's current active state.
+// Always render fresh so the page reflects the event's current active state
+// and latest settings (greeting, name, etc.) rather than a cached response.
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 function Message({ text }: { text: string }) {
   return (
@@ -152,6 +155,8 @@ export default async function InvitePage({
             labels={{
               attendeesLabel: t.attendeesLabel,
               submit: t.submit,
+              decline: t.decline,
+              declined: t.declined,
               submitted: t.submitted,
             }}
           />
