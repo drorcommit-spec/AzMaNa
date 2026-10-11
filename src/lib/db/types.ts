@@ -12,6 +12,7 @@ export type EventRow = {
   event_date: string | null;
   event_time: string | null;
   is_active: boolean;
+  deleted_at: string | null;
   created_at: string;
 };
 
@@ -26,6 +27,7 @@ export type GuestRow = {
   token: string;
   invite_sent_at: string | null;
   first_opened_at: string | null;
+  deleted_at: string | null;
   created_at: string;
 };
 

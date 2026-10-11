@@ -95,7 +95,9 @@ export function csvToGuests(text: string): {
   const lines = text
     .replace(/\r\n/g, "\n")
     .split("\n")
-    .filter((l) => l.trim().length > 0);
+    // Drop blank lines and spreadsheet padding rows that are only commas,
+    // so they are not counted as "skipped".
+    .filter((l) => l.replace(/[,\s]/g, "").length > 0);
   if (lines.length === 0) return { rows: [], skipped: 0 };
 
   const header = parseLine(lines[0]).map((h) => h.trim().toLowerCase());

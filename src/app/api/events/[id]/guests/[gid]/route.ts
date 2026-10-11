@@ -76,9 +76,10 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Soft delete: mark deleted_at, never physically remove the row.
   const { error } = await supabase
     .from("guest")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", params.gid)
     .eq("event_id", params.id);
 

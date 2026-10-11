@@ -41,6 +41,7 @@ export async function getInviteView(token: string): Promise<InviteResult> {
     .from("guest")
     .select("id, event_id, first_name, last_name, predicted_guests")
     .eq("token", token)
+    .is("deleted_at", null)
     .maybeSingle<
       Pick<GuestRow, "id" | "event_id" | "first_name" | "last_name" | "predicted_guests">
     >();
@@ -53,6 +54,7 @@ export async function getInviteView(token: string): Promise<InviteResult> {
     .from("event")
     .select("name, language, image_url, address, greeting, event_date, event_time, is_active")
     .eq("id", guest.event_id)
+    .is("deleted_at", null)
     .maybeSingle<
       Pick<
         EventRow,

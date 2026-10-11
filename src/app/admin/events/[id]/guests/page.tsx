@@ -30,6 +30,7 @@ export default async function GuestsPage({
       "id, first_name, last_name, mobile, predicted_guests, family_relation, token, invite_sent_at, first_opened_at, rsvp(attendee_count)",
     )
     .eq("event_id", params.id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: true });
 
   const guests: Guest[] = (data ?? []).map((g: any) => {

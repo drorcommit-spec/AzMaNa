@@ -14,6 +14,7 @@ export default async function AdminHomePage() {
   const { data } = await supabase
     .from("event")
     .select("id, name, address, language, is_active, created_at")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   const events = (data ?? []) as Pick<

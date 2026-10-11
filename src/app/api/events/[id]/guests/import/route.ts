@@ -30,7 +30,8 @@ export async function POST(
   const { data: existing } = await supabase
     .from("guest")
     .select("mobile")
-    .eq("event_id", params.id);
+    .eq("event_id", params.id)
+    .is("deleted_at", null);
   const existingMobiles = new Set((existing ?? []).map((g) => g.mobile));
 
   let added = 0;
