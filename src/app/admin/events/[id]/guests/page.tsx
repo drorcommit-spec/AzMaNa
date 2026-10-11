@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { EventRow } from "@/lib/db/types";
 import { formatEventDate } from "@/lib/invite/helpers";
@@ -50,18 +51,26 @@ export default async function GuestsPage({
   const language = event?.language ?? "en";
 
   return (
-    <GuestManager
-      eventId={params.id}
-      eventName={event?.name ?? ""}
-      language={language}
-      template={event?.whatsapp_template ?? null}
-      eventDate={formatEventDate(
-        event?.event_date ?? null,
-        language === "he" ? "he-IL" : "en-GB",
-      )}
-      eventTime={event?.event_time ?? ""}
-      baseUrl={process.env.NEXT_PUBLIC_SITE_URL ?? ""}
-      guests={guests}
-    />
+    <div>
+      <Link
+        href={`/admin/events/${params.id}`}
+        style={{ display: "inline-block", marginBottom: 12, textDecoration: "none" }}
+      >
+        ← Back to event
+      </Link>
+      <GuestManager
+        eventId={params.id}
+        eventName={event?.name ?? ""}
+        language={language}
+        template={event?.whatsapp_template ?? null}
+        eventDate={formatEventDate(
+          event?.event_date ?? null,
+          language === "he" ? "he-IL" : "en-GB",
+        )}
+        eventTime={event?.event_time ?? ""}
+        baseUrl={process.env.NEXT_PUBLIC_SITE_URL ?? ""}
+        guests={guests}
+      />
+    </div>
   );
 }

@@ -4,42 +4,44 @@ import { signOutAction } from "@/app/login/actions";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0.75rem 1.25rem",
-          borderBottom: "1px solid #ddd",
-        }}
-      >
+    <div style={{ minHeight: "100vh", background: "var(--cream)" }}>
+      <header className="az-appbar">
         <Link
           href="/admin"
           style={{
-            fontWeight: 600,
+            fontWeight: 700,
             display: "flex",
             alignItems: "center",
             gap: 10,
-            textDecoration: "none",
-            color: "inherit",
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.jpeg"
             alt="AzMaNa"
-            width={32}
-            height={32}
+            width={30}
+            height={30}
             style={{ borderRadius: 6, objectFit: "cover" }}
           />
-          AzMaNa Admin
+          AzMaNa
         </Link>
         <form action={signOutAction}>
-          <button type="submit">Log out</button>
+          <button
+            type="submit"
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "#fff",
+              padding: "6px 12px",
+              borderRadius: 8,
+              cursor: "pointer",
+            }}
+          >
+            Log out
+          </button>
         </form>
       </header>
-      <main style={{ padding: "1.25rem" }}>{children}</main>
+      <div className="az-container">{children}</div>
     </div>
   );
 }

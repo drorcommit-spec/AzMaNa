@@ -114,15 +114,19 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
 
   const labelStyle: React.CSSProperties = {
     display: "block",
-    marginBottom: 12,
+    marginBottom: 16,
     fontWeight: 600,
   };
   const inputStyle: React.CSSProperties = {
     display: "block",
     width: "100%",
-    padding: "8px 10px",
+    padding: "12px",
     marginTop: 4,
     fontWeight: 400,
+    fontSize: 16,
+    border: "1px solid #cbd5e1",
+    borderRadius: 10,
+    background: "#f8fafc",
     boxSizing: "border-box",
   };
 
@@ -243,8 +247,13 @@ export function EventForm({ initial }: { initial?: EventFormValues }) {
         </p>
       ) : null}
 
-      <button type="submit" disabled={saving || uploading}>
-        {saving ? "Saving..." : "Save event"}
+      <button
+        type="submit"
+        disabled={saving || uploading}
+        className="az-btn az-btn-gold az-btn-block"
+        style={{ marginTop: 8 }}
+      >
+        {saving ? "Saving..." : "✨ Save event"}
       </button>
     </form>
   );

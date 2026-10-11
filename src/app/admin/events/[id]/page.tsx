@@ -40,8 +40,16 @@ export default async function EditEventPage({
 
   return (
     <div>
+      <Link
+        href="/admin"
+        style={{ display: "inline-block", marginBottom: 12, textDecoration: "none" }}
+      >
+        ← Back to events
+      </Link>
       <nav style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-        <Link href={`/admin/events/${params.id}/guests`}>Guests</Link>
+        <Link href={`/admin/events/${params.id}/guests`} className="az-btn">
+          👥 Manage guests
+        </Link>
       </nav>
       <EventForm
         initial={{

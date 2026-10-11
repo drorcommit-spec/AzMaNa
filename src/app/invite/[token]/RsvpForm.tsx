@@ -48,19 +48,20 @@ export function RsvpForm({
   }
 
   const circleButton = (bg: string): React.CSSProperties => ({
-    width: 56,
-    height: 56,
+    width: 64,
+    height: 64,
     borderRadius: "50%",
     border: "none",
     background: bg,
     color: "#fff",
-    fontSize: 28,
+    fontSize: 32,
     lineHeight: 1,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 3px 8px rgba(0,0,0,0.15)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.18)",
+    touchAction: "manipulation",
   });
 
   return (
@@ -93,15 +94,16 @@ export function RsvpForm({
 
         <span
           style={{
-            minWidth: 72,
-            height: 56,
+            minWidth: 84,
+            height: 64,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 28,
+            fontSize: 32,
             fontWeight: 700,
+            background: "#fff",
             border: "2px solid #e5c87a",
-            borderRadius: 14,
+            borderRadius: 16,
           }}
         >
           {count}
@@ -139,19 +141,20 @@ export function RsvpForm({
         disabled={busy}
         style={{
           width: "100%",
-          padding: "14px 16px",
+          padding: "16px",
           border: "none",
-          borderRadius: 12,
-          background: "linear-gradient(90deg, #d4a62a, #e9c558)",
+          borderRadius: 14,
+          background: "linear-gradient(135deg, #d4af37, #aa7c11)",
           color: "#fff",
           fontSize: 18,
           fontWeight: 700,
           cursor: "pointer",
-          boxShadow: "0 4px 12px rgba(212,166,42,0.35)",
+          boxShadow: "0 6px 16px rgba(197,160,89,0.4)",
           opacity: busy ? 0.7 : 1,
+          touchAction: "manipulation",
         }}
       >
-        {labels.submit} ✨
+        ✨ {labels.submit}
       </button>
 
       <button

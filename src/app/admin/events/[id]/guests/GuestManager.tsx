@@ -321,18 +321,77 @@ export function GuestManager({
     return <span style={{ color: "#bbb" }}>Not sent</span>;
   }
 
+  function statusBadge(g: Guest) {
+    if (g.attendee_count !== null) {
+      return (
+        <span className="az-badge az-badge-active">
+          Responded ({g.attendee_count})
+        </span>
+      );
+    }
+    if (g.first_opened_at) {
+      return <span className="az-badge az-badge-info">Opened</span>;
+    }
+    if (isSent(g)) {
+      return <span className="az-badge az-badge-inactive">Sent</span>;
+    }
+    return <span className="az-badge az-badge-muted">Not sent</span>;
+  }
+
+  const cellInputF: React.CSSProperties = {
+    ...cellInput,
+    padding: "10px",
+    fontSize: 16,
+    border: "1px solid #cbd5e1",
+    borderRadius: 8,
+    marginBottom: 6,
+  };
+
   return (
     <div>
       <h1>Guests</h1>
 
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
-        <button onClick={startQueue} disabled={pendingCount === 0 || queueActive} style={{ ...waBtn, padding: "10px 16px" }}>
-          Send to all ({pendingCount})
-        </button>
-        <button type="button" onClick={exportCsv} disabled={guests.length === 0}>
+      <div className="az-stats">
+        <span className="az-stat">
+          Guests <b>{guests.length}</b>
+        </span>
+        <span className="az-stat">
+          Predicted <b>{predictedTotal}</b>
+        </span>
+        <span className="az-stat">
+          Responded <b>{respondedCount}</b>
+        </span>
+        <span className="az-stat">
+          Confirmed <b>{confirmedTotal}</b>
+        </span>
+      </div>
+
+      <button
+        onClick={startQueue}
+        disabled={pendingCount === 0 || queueActive}
+        className="az-btn az-btn-wa az-btn-block"
+        style={{ marginBottom: 10 }}
+      >
+        💬 Send to all guests ({pendingCount})
+      </button>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+        <button
+          type="button"
+          onClick={exportCsv}
+          disabled={guests.length === 0}
+          className="az-btn"
+          style={{ flex: 1 }}
+        >
           Export CSV
         </button>
-        <button type="button" onClick={() => fileRef.current?.click()} disabled={busy}>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          className="az-btn"
+          style={{ flex: 1 }}
+        >
           Import CSV
         </button>
         <input
@@ -348,123 +407,222 @@ export function GuestManager({
       </div>
       {importMsg ? <p style={{ color: "#2e8b57" }}>{importMsg}</p> : null}
 
-      <p style={{ fontWeight: 600 }}>
-        Guests: {guests.length} &nbsp;|&nbsp; Predicted: {predictedTotal} &nbsp;|&nbsp;
-        Responded: {respondedCount} &nbsp;|&nbsp; Confirmed attendees: {confirmedTotal}
-      </p>
-
       {queueActive ? (
-        <div style={{ border: "1px solid #cde", background: "#f2f8ff", borderRadius: 8, padding: 12, marginBottom: 12 }}>
-          <p style={{ margin: "0 0 8px" }}>
+        <div
+          style={{
+            border: "1px solid #cde",
+            background: "#f2f8ff",
+            borderRadius: 12,
+            padding: 14,
+            marginBottom: 12,
+          }}
+        >
+          <p style={{ margin: "0 0 10px" }}>
             Sending {queueIndex + 1} of {queueRef.current.length}:{" "}
             <strong>
-              {queueRef.current[queueIndex]?.first_name} {queueRef.current[queueIndex]?.last_name}
+              {queueRef.current[queueIndex]?.first_name}{" "}
+              {queueRef.current[queueIndex]?.last_name}
             </strong>
-            . After you tap send in WhatsApp, come back and continue.
           </p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={sendNextInQueue} style={waBtn}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={sendNextInQueue} className="az-btn az-btn-wa">
               {queueIndex + 1 >= queueRef.current.length ? "Finish" : "Next guest"}
             </button>
-            <button onClick={() => openWhatsapp(queueRef.current[queueIndex])}>Reopen this one</button>
-            <button onClick={stopQueue}>Stop</button>
+            <button
+              onClick={() => openWhatsapp(queueRef.current[queueIndex])}
+              className="az-btn"
+            >
+              Reopen
+            </button>
+            <button onClick={stopQueue} className="az-btn">
+              Stop
+            </button>
           </div>
         </div>
       ) : null}
 
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 760 }}>
-          <thead>
-            <tr>
-              <th style={{ ...th, width: 32 }}>#</th>
-              <th style={th}>Guest</th>
-              <th style={th}>Predicted</th>
-              <th style={th}>Family</th>
-              <th style={th}>Status</th>
-              <th style={th}>Last sent</th>
-              <th style={{ ...th, textAlign: "right" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedGuests.map((g, i) => {
-              const editing = editingId === g.id;
-              if (editing) {
-                return (
-                  <tr key={g.id}>
-                    <td style={{ ...td, color: "#999" }}>{i + 1}</td>
-                    <td style={td}>
-                      <input style={cellInput} value={editForm.firstName} placeholder="First"
-                        onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} />
-                      <input style={{ ...cellInput, marginTop: 4 }} value={editForm.lastName} placeholder="Last"
-                        onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} />
-                      <input style={{ ...cellInput, marginTop: 4 }} value={editForm.mobile} placeholder="Mobile"
-                        onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })} />
-                    </td>
-                    <td style={td}>
-                      <input style={cellInput} type="text" inputMode="numeric" value={editForm.predictedGuests}
-                        onChange={(e) => setEditForm({ ...editForm, predictedGuests: Number(e.target.value.replace(/\D/g, "")) })} />
-                    </td>
-                    <td style={td}>
-                      <input style={cellInput} value={editForm.familyRelation}
-                        onChange={(e) => setEditForm({ ...editForm, familyRelation: e.target.value })} />
-                    </td>
-                    <td style={td}>{statusLabel(g)}</td>
-                    <td style={{ ...td, color: "#888", fontSize: 13 }}>
-                      {sentNow[g.id] ? "Just now" : formatStamp(g.invite_sent_at) ?? "—"}
-                    </td>
-                    <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
-                      <button onClick={() => saveEdit(g.id)} disabled={busy}>Save</button>{" "}
-                      <button onClick={cancelEdit} disabled={busy}>Cancel</button>
-                    </td>
-                  </tr>
-                );
-              }
-              return (
-                <tr key={g.id}>
-                  <td style={{ ...td, color: "#999" }}>{i + 1}</td>
-                  <td style={td}>
-                    {g.first_name} {g.last_name}
-                    <div style={{ color: "#888", fontSize: 13 }}>{g.mobile}</div>
-                  </td>
-                  <td style={td}>{g.predicted_guests}</td>
-                  <td style={td}>{g.family_relation ?? ""}</td>
-                  <td style={td}>{statusLabel(g)}</td>
-                  <td style={{ ...td, color: "#888", fontSize: 13 }}>
-                    {sentNow[g.id] ? "Just now" : formatStamp(g.invite_sent_at) ?? "—"}
-                  </td>
-                  <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
-                    <button onClick={() => openWhatsapp(g)} style={waBtn}>WhatsApp</button>{" "}
-                    <button onClick={() => startEdit(g)} disabled={busy}>Edit</button>{" "}
-                    <button onClick={() => removeGuest(g.id)} disabled={busy}>Remove</button>
-                  </td>
-                </tr>
-              );
-            })}
-            {guests.length === 0 ? (
-              <tr>
-                <td style={td} colSpan={7}>No guests yet.</td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
+      {/* Guest cards */}
+      {sortedGuests.map((g, i) => {
+        const editing = editingId === g.id;
+        if (editing) {
+          return (
+            <div key={g.id} className="az-row">
+              <input
+                style={cellInputF}
+                value={editForm.firstName}
+                placeholder="First name"
+                onChange={(e) =>
+                  setEditForm({ ...editForm, firstName: e.target.value })
+                }
+              />
+              <input
+                style={cellInputF}
+                value={editForm.lastName}
+                placeholder="Last name"
+                onChange={(e) =>
+                  setEditForm({ ...editForm, lastName: e.target.value })
+                }
+              />
+              <input
+                style={cellInputF}
+                value={editForm.mobile}
+                placeholder="Mobile"
+                onChange={(e) =>
+                  setEditForm({ ...editForm, mobile: e.target.value })
+                }
+              />
+              <input
+                style={cellInputF}
+                type="text"
+                inputMode="numeric"
+                placeholder="Predicted"
+                value={editForm.predictedGuests}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    predictedGuests: Number(e.target.value.replace(/\D/g, "")),
+                  })
+                }
+              />
+              <input
+                style={cellInputF}
+                value={editForm.familyRelation}
+                placeholder="Family relation"
+                onChange={(e) =>
+                  setEditForm({ ...editForm, familyRelation: e.target.value })
+                }
+              />
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => saveEdit(g.id)}
+                  disabled={busy}
+                  className="az-btn az-btn-gold"
+                  style={{ flex: 1 }}
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelEdit}
+                  disabled={busy}
+                  className="az-btn"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div key={g.id} className="az-row">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: 8,
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 700 }}>
+                  <span style={{ color: "#bbb", marginInlineEnd: 6 }}>{i + 1}.</span>
+                  {g.first_name} {g.last_name}
+                </div>
+                <div style={{ color: "var(--muted)", fontSize: 13, marginTop: 2 }}>
+                  {g.mobile} • {g.predicted_guests} predicted
+                  {g.family_relation ? ` • ${g.family_relation}` : ""}
+                </div>
+                {isSent(g) || sentNow[g.id] ? (
+                  <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 2 }}>
+                    Sent: {sentNow[g.id] ? "Just now" : formatStamp(g.invite_sent_at)}
+                  </div>
+                ) : null}
+              </div>
+              {statusBadge(g)}
+            </div>
 
-      {editError ? <p role="alert" style={{ color: "crimson" }}>{editError}</p> : null}
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <button
+                onClick={() => openWhatsapp(g)}
+                className="az-btn az-btn-wa"
+                style={{ flex: 1 }}
+              >
+                WhatsApp
+              </button>
+              <button onClick={() => startEdit(g)} disabled={busy} className="az-btn">
+                Edit
+              </button>
+              <button
+                onClick={() => removeGuest(g.id)}
+                disabled={busy}
+                className="az-btn"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        );
+      })}
+      {guests.length === 0 ? (
+        <p style={{ color: "var(--muted)" }}>No guests yet.</p>
+      ) : null}
+
+      {editError ? (
+        <p role="alert" style={{ color: "crimson" }}>
+          {editError}
+        </p>
+      ) : null}
 
       <h2>Add guest</h2>
-      <form onSubmit={addGuest} style={{ display: "grid", gap: 8, maxWidth: 420 }}>
-        <input placeholder="First name" value={form.firstName} required
-          onChange={(e) => setForm({ ...form, firstName: e.target.value })} />
-        <input placeholder="Last name" value={form.lastName} required
-          onChange={(e) => setForm({ ...form, lastName: e.target.value })} />
-        <input placeholder="Mobile number" value={form.mobile} required
-          onChange={(e) => setForm({ ...form, mobile: e.target.value })} />
-        <input type="text" inputMode="numeric" placeholder="Predicted guests" value={form.predictedGuests}
-          onChange={(e) => setForm({ ...form, predictedGuests: Number(e.target.value.replace(/\D/g, "")) })} />
-        <input placeholder="Family relation (optional)" value={form.familyRelation}
-          onChange={(e) => setForm({ ...form, familyRelation: e.target.value })} />
-        {error ? <p role="alert" style={{ color: "crimson" }}>{error}</p> : null}
-        <button type="submit" disabled={busy}>Add guest</button>
+      <form onSubmit={addGuest} className="az-card" style={{ display: "grid", gap: 10 }}>
+        <input
+          className="az-input"
+          placeholder="First name"
+          value={form.firstName}
+          required
+          onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+        />
+        <input
+          className="az-input"
+          placeholder="Last name"
+          value={form.lastName}
+          required
+          onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+        />
+        <input
+          className="az-input"
+          placeholder="Mobile number"
+          value={form.mobile}
+          required
+          onChange={(e) => setForm({ ...form, mobile: e.target.value })}
+        />
+        <input
+          className="az-input"
+          type="text"
+          inputMode="numeric"
+          placeholder="Predicted guests"
+          value={form.predictedGuests}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              predictedGuests: Number(e.target.value.replace(/\D/g, "")),
+            })
+          }
+        />
+        <input
+          className="az-input"
+          placeholder="Family relation (optional)"
+          value={form.familyRelation}
+          onChange={(e) => setForm({ ...form, familyRelation: e.target.value })}
+        />
+        {error ? (
+          <p role="alert" style={{ color: "crimson", margin: 0 }}>
+            {error}
+          </p>
+        ) : null}
+        <button type="submit" disabled={busy} className="az-btn az-btn-gold">
+          Add guest
+        </button>
       </form>
     </div>
   );

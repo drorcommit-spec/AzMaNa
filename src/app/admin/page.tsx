@@ -21,20 +21,6 @@ export default async function AdminHomePage() {
     "id" | "name" | "address" | "language" | "is_active" | "created_at"
   >[];
 
-  const th: React.CSSProperties = {
-    textAlign: "left",
-    padding: "8px 12px",
-    borderBottom: "2px solid #ddd",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  };
-  const td: React.CSSProperties = {
-    textAlign: "left",
-    padding: "8px 12px",
-    borderBottom: "1px solid #eee",
-    verticalAlign: "middle",
-  };
-
   return (
     <div>
       <div
@@ -42,49 +28,62 @@ export default async function AdminHomePage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 8,
         }}
       >
-        <h1>Your events</h1>
-        <Link href="/admin/events/new">+ New event</Link>
+        <h1 style={{ margin: 0 }}>Your events</h1>
+        <Link href="/admin/events/new" className="az-btn az-btn-gold">
+          + New event
+        </Link>
       </div>
 
-      <table style={{ borderCollapse: "collapse", width: "100%", maxWidth: 900, marginTop: 12 }}>
-        <thead>
-          <tr>
-            <th style={th}>Event</th>
-            <th style={th}>Address</th>
-            <th style={th}>Language</th>
-            <th style={th}>Status</th>
-            <th style={{ ...th, textAlign: "right" }}>Manage</th>
-          </tr>
-        </thead>
-        <tbody>
-          {events.map((e) => (
-            <tr key={e.id}>
-              <td style={td}>
-                <Link href={`/admin/events/${e.id}`}>
-                  {e.name || "(untitled event)"}
-                </Link>
-              </td>
-              <td style={td}>{e.address}</td>
-              <td style={td}>{e.language === "he" ? "Hebrew" : "English"}</td>
-              <td style={td}>
-                <ActiveToggle eventId={e.id} initialActive={e.is_active} />
-              </td>
-              <td style={{ ...td, textAlign: "right", whiteSpace: "nowrap" }}>
-                <Link href={`/admin/events/${e.id}/guests`}>Guests</Link>
-              </td>
-            </tr>
-          ))}
-          {events.length === 0 ? (
-            <tr>
-              <td style={td} colSpan={5}>
-                No events yet. Create your first one.
-              </td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
+      {events.length === 0 ? (
+        <p style={{ color: "var(--muted)" }}>No events yet. Create your first one.</p>
+      ) : null}
+
+      {events.map((e) => (
+        <div key={e.id} className="az-row">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 8,
+            }}
+          >
+            <Link
+              href={`/admin/events/${e.id}`}
+              style={{
+                color: "var(--gold)",
+                fontSize: 17,
+                fontWeight: 700,
+                textDecoration: "underline",
+              }}
+            >
+              {e.name || "(untitled event)"}
+            </Link>
+            <ActiveToggle eventId={e.id} initialActive={e.is_active} />
+          </div>
+          <p style={{ color: "var(--muted)", fontSize: 14, margin: "8px 0 0" }}>
+            📍 {e.address}
+          </p>
+          <p style={{ color: "var(--muted)", fontSize: 14, margin: "2px 0 0" }}>
+            {e.language === "he" ? "Hebrew" : "English"}
+          </p>
+          <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+            <Link href={`/admin/events/${e.id}`} className="az-btn" style={{ flex: 1 }}>
+              ✏️ Edit event
+            </Link>
+            <Link
+              href={`/admin/events/${e.id}/guests`}
+              className="az-btn"
+              style={{ flex: 1 }}
+            >
+              👥 Guests
+            </Link>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

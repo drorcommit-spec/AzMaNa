@@ -33,8 +33,14 @@ export function ActiveToggle({
   }
 
   return (
-    <button onClick={toggle} disabled={busy}>
-      {active ? "Active" : "Inactive"}
+    <button
+      onClick={toggle}
+      disabled={busy}
+      className={`az-badge ${active ? "az-badge-active" : "az-badge-inactive"}`}
+      style={{ border: "none", cursor: "pointer", opacity: busy ? 0.6 : 1 }}
+      title="Tap to toggle"
+    >
+      {active ? "● Active" : "○ Inactive"}
     </button>
   );
 }
