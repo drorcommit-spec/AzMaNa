@@ -51,6 +51,7 @@ export function GuestManager({
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [search, setSearch] = useState("");
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>(EMPTY);
@@ -90,6 +91,14 @@ export function GuestManager({
       ),
     [guests],
   );
+  const filteredGuests = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return sortedGuests;
+    return sortedGuests.filter((g) =>
+      `${g.first_name} ${g.last_name}`.toLowerCase().includes(q),
+    );
+  }, [sortedGuests, search]);
+
   const predictedTotal = guests.reduce((s, g) => s + (g.predicted_guests ?? 0), 0);
   const confirmedTotal = guests.reduce((s, g) => s + (g.attendee_count ?? 0), 0);
   const respondedCount = guests.filter((g) => g.attendee_count !== null).length;
@@ -407,6 +416,15 @@ export function GuestManager({
       </div>
       {importMsg ? <p style={{ color: "#2e8b57" }}>{importMsg}</p> : null}
 
+      <input
+        className="az-input"
+        type="search"
+        placeholder="Search by first or last name"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: 12 }}
+      />
+
       {queueActive ? (
         <div
           style={{
@@ -442,7 +460,7 @@ export function GuestManager({
       ) : null}
 
       {/* Guest cards */}
-      {sortedGuests.map((g, i) => {
+      {filteredGuests.map((g, i) => {
         const editing = editingId === g.id;
         if (editing) {
           return (
@@ -565,6 +583,8 @@ export function GuestManager({
       })}
       {guests.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No guests yet.</p>
+      ) : filteredGuests.length === 0 ? (
+        <p style={{ color: "var(--muted)" }}>No guests match “{search}”.</p>
       ) : null}
 
       {editError ? (
