@@ -19,6 +19,36 @@ export const CSV_HEADERS = [
   "family_relation",
 ];
 
+// Export adds derived message status and the confirmed response value.
+export const CSV_EXPORT_HEADERS = [
+  ...CSV_HEADERS,
+  "message_status",
+  "attendee_count",
+];
+
+export type GuestExportRow = {
+  first_name: string;
+  last_name: string;
+  mobile: string;
+  predicted_guests: number;
+  family_relation: string | null;
+  invite_sent_at: string | null;
+  first_opened_at: string | null;
+  attendee_count: number | null;
+};
+
+/** Human-readable message status matching the guest list badges. */
+export function guestMessageStatus(g: {
+  invite_sent_at: string | null;
+  first_opened_at: string | null;
+  attendee_count: number | null;
+}): string {
+  if (g.attendee_count !== null) return "Responded";
+  if (g.first_opened_at) return "Opened";
+  if (g.invite_sent_at) return "Sent";
+  return "Not sent";
+}
+
 function escapeCell(value: string): string {
   const v = value ?? "";
   if (/[",\n]/.test(v)) {
@@ -46,6 +76,28 @@ export function guestsToCsv(
         escapeCell(r.mobile),
         String(r.predicted_guests ?? 0),
         escapeCell(r.family_relation ?? ""),
+      ].join(","),
+    );
+  }
+  return lines.join("\n");
+}
+
+/**
+ * Serializes guest rows to CSV for export, including derived message status
+ * and the confirmed attendee count (blank when the guest has not responded).
+ */
+export function guestsToExportCsv(rows: GuestExportRow[]): string {
+  const lines = [CSV_EXPORT_HEADERS.join(",")];
+  for (const r of rows) {
+    lines.push(
+      [
+        escapeCell(r.first_name),
+        escapeCell(r.last_name),
+        escapeCell(r.mobile),
+        String(r.predicted_guests ?? 0),
+        escapeCell(r.family_relation ?? ""),
+        escapeCell(guestMessageStatus(r)),
+        r.attendee_count === null ? "" : String(r.attendee_count),
       ].join(","),
     );
   }

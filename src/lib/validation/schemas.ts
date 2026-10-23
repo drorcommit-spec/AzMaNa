@@ -74,3 +74,16 @@ export const rsvpSchema = z.object({
     .max(ATTENDEE_MAX, `Maximum is ${ATTENDEE_MAX}`),
 });
 export type RsvpInput = z.infer<typeof rsvpSchema>;
+
+// Admin-set RSVP: an organizer records a response on the guest's behalf
+// (e.g. a guest who confirmed by phone, not via the invite link).
+// `null` clears the existing response.
+export const adminRsvpSchema = z.object({
+  attendeeCount: z
+    .number()
+    .int("Attendee count must be a whole number")
+    .min(ATTENDEE_MIN, `Minimum is ${ATTENDEE_MIN}`)
+    .max(ATTENDEE_MAX, `Maximum is ${ATTENDEE_MAX}`)
+    .nullable(),
+});
+export type AdminRsvpInput = z.infer<typeof adminRsvpSchema>;

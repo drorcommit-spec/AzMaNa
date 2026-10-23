@@ -2,7 +2,11 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { csvToGuests, decodeCsvFile, guestsToCsv } from "@/lib/guests/csv";
+import {
+  csvToGuests,
+  decodeCsvFile,
+  guestsToExportCsv,
+} from "@/lib/guests/csv";
 import { buildInviteMessage, buildWhatsappLink } from "@/lib/invite/helpers";
 
 export type Guest = {
@@ -52,10 +56,18 @@ export function GuestManager({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "not_sent" | "sent" | "opened" | "responded"
+  >("all");
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditForm>(EMPTY);
   const [editError, setEditError] = useState<string | null>(null);
+
+  // Manual RSVP (organizer sets a response for a guest who confirmed off-link).
+  const [rsvpEditingId, setRsvpEditingId] = useState<string | null>(null);
+  const [rsvpValue, setRsvpValue] = useState(1);
+  const [rsvpError, setRsvpError] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [importMsg, setImportMsg] = useState<string | null>(null);
@@ -68,6 +80,12 @@ export function GuestManager({
 
   const linkFor = (token: string) => `${baseUrl}/invite/${token}`;
   const isSent = (g: Guest) => Boolean(g.invite_sent_at) || sentNow[g.id];
+  const statusOf = (g: Guest): "not_sent" | "sent" | "opened" | "responded" => {
+    if (g.attendee_count !== null) return "responded";
+    if (g.first_opened_at) return "opened";
+    if (isSent(g)) return "sent";
+    return "not_sent";
+  };
 
   const formatStamp = (iso: string | null) => {
     if (!iso) return null;
@@ -93,11 +111,16 @@ export function GuestManager({
   );
   const filteredGuests = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return sortedGuests;
-    return sortedGuests.filter((g) =>
-      `${g.first_name} ${g.last_name}`.toLowerCase().includes(q),
-    );
-  }, [sortedGuests, search]);
+    return sortedGuests.filter((g) => {
+      const matchesName =
+        !q || `${g.first_name} ${g.last_name}`.toLowerCase().includes(q);
+      const matchesStatus =
+        statusFilter === "all" || statusOf(g) === statusFilter;
+      return matchesName && matchesStatus;
+    });
+    // statusOf depends on sentNow so recompute when optimistic sends change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortedGuests, search, statusFilter, sentNow]);
 
   const predictedTotal = guests.reduce((s, g) => s + (g.predicted_guests ?? 0), 0);
   const confirmedTotal = guests.reduce((s, g) => s + (g.attendee_count ?? 0), 0);
@@ -105,7 +128,7 @@ export function GuestManager({
 
   // ---- CSV ----
   function exportCsv() {
-    const csv = guestsToCsv(guests);
+    const csv = guestsToExportCsv(guests);
     const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -283,6 +306,37 @@ export function GuestManager({
     }
   }
 
+  // ---- Manual RSVP ----
+  function startRsvp(g: Guest) {
+    setRsvpEditingId(g.id);
+    setRsvpError(null);
+    setRsvpValue(g.attendee_count ?? 1);
+  }
+  function cancelRsvp() {
+    setRsvpEditingId(null);
+    setRsvpError(null);
+  }
+  async function saveRsvp(gid: string, attendeeCount: number | null) {
+    setBusy(true);
+    setRsvpError(null);
+    try {
+      const res = await fetch(`/api/events/${eventId}/guests/${gid}/rsvp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ attendeeCount }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setRsvpError(data.error ?? "Could not save RSVP.");
+        return;
+      }
+      setRsvpEditingId(null);
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const th: React.CSSProperties = {
     textAlign: "left",
     padding: "8px 10px",
@@ -416,14 +470,31 @@ export function GuestManager({
       </div>
       {importMsg ? <p style={{ color: "#2e8b57" }}>{importMsg}</p> : null}
 
-      <input
-        className="az-input"
-        type="search"
-        placeholder="Search by first or last name"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: 12 }}
-      />
+      <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+        <input
+          className="az-input"
+          type="search"
+          placeholder="Search by first or last name"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ flex: 1 }}
+        />
+        <select
+          className="az-input"
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value as typeof statusFilter)
+          }
+          aria-label="Filter by message status"
+          style={{ flex: "0 0 160px" }}
+        >
+          <option value="all">All statuses</option>
+          <option value="not_sent">Not sent</option>
+          <option value="sent">Sent</option>
+          <option value="opened">Opened</option>
+          <option value="responded">Responded</option>
+        </select>
+      </div>
 
       {queueActive ? (
         <div
@@ -578,13 +649,76 @@ export function GuestManager({
                 Remove
               </button>
             </div>
+
+            {rsvpEditingId === g.id ? (
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  marginTop: 10,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
+                <span style={{ fontSize: 13, color: "var(--muted)" }}>
+                  Attendees:
+                </span>
+                <input
+                  className="az-input"
+                  type="text"
+                  inputMode="numeric"
+                  value={rsvpValue}
+                  onChange={(e) =>
+                    setRsvpValue(Number(e.target.value.replace(/\D/g, "")) || 0)
+                  }
+                  style={{ width: 70 }}
+                />
+                <button
+                  onClick={() => saveRsvp(g.id, rsvpValue)}
+                  disabled={busy}
+                  className="az-btn az-btn-gold"
+                >
+                  Save RSVP
+                </button>
+                {g.attendee_count !== null ? (
+                  <button
+                    onClick={() => saveRsvp(g.id, null)}
+                    disabled={busy}
+                    className="az-btn"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+                <button onClick={cancelRsvp} disabled={busy} className="az-btn">
+                  Cancel
+                </button>
+                {rsvpError ? (
+                  <span role="alert" style={{ color: "crimson", fontSize: 13 }}>
+                    {rsvpError}
+                  </span>
+                ) : null}
+              </div>
+            ) : (
+              <div style={{ marginTop: 8 }}>
+                <button
+                  onClick={() => startRsvp(g)}
+                  disabled={busy}
+                  className="az-btn"
+                  style={{ fontSize: 13 }}
+                >
+                  {g.attendee_count !== null
+                    ? "Edit RSVP manually"
+                    : "Set RSVP manually"}
+                </button>
+              </div>
+            )}
           </div>
         );
       })}
       {guests.length === 0 ? (
         <p style={{ color: "var(--muted)" }}>No guests yet.</p>
       ) : filteredGuests.length === 0 ? (
-        <p style={{ color: "var(--muted)" }}>No guests match “{search}”.</p>
+        <p style={{ color: "var(--muted)" }}>No guests match the current filters.</p>
       ) : null}
 
       {editError ? (
